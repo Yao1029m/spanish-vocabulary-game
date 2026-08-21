@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Español · 单词记忆小屋</title>
+<style>
+:root {
+  --bg:#fff8f3; --card:#ffffff; --ink:#4d4650; --muted:#8d8490;
+  --pink:#ffd9e7; --blue:#d9efff; --yellow:#fff0bd; --green:#dff6e8;
+  --purple:#e8ddff; --shadow:0 16px 45px rgba(91,73,91,.12);
+  --shadow2:0 8px 22px rgba(91,73,91,.10); --radius:28px;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:
+ radial-gradient(circle at 8% 12%,#ffe8f0 0 7%,transparent 24%),
+ radial-gradient(circle at 92% 8%,#e4f5ff 0 8%,transparent 25%),
+ linear-gradient(135deg,#fffaf6,#f8f4ff 55%,#f5fbff);
+ color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+button,textarea{font:inherit}
+.app{width:80vw;min-height:94vh;margin:3vh auto;display:flex;flex-direction:column;gap:16px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:54px;height:54px;border-radius:18px;background:var(--yellow);display:grid;place-items:center;font-size:28px;box-shadow:var(--shadow2);transform:rotate(-3deg)}
+.brand h1{margin:0;font-size:23px} .brand small{color:var(--muted)}
+.tabs{display:flex;gap:8px;padding:7px;background:#fff9;border:1px solid #fff;border-radius:22px;box-shadow:var(--shadow2)}
+.tab{border:0;background:transparent;color:var(--muted);padding:10px 16px;border-radius:16px;cursor:pointer;font-weight:700;transition:.2s}
+.tab:hover{transform:translateY(-2px);background:#fff}
+.tab.active{background:var(--purple);color:#574a78}
+.score{min-width:130px;padding:10px 16px;border-radius:20px;background:#fff;box-shadow:var(--shadow2);text-align:center}
+.score b{font-size:22px;color:#705d8e;display:inline-block}
+.score.bump b{animation:bump .45s ease}
+@keyframes bump{0%{transform:translateY(0) scale(1)}40%{transform:translateY(-10px) scale(1.25)}100%{transform:translateY(0) scale(1)}}
+.layout{display:grid;grid-template-columns:220px minmax(0,1fr) 180px;gap:18px;flex:1;align-items:stretch}
+.panel,.card{background:#fffffff2;border:1px solid #fff;box-shadow:var(--shadow);border-radius:var(--radius);backdrop-filter:blur(8px)}
+.notes{padding:18px;display:flex;flex-direction:column;min-height:650px}
+.notes h2,.motivation h2{font-size:16px;margin:0 0 10px}
+.notes textarea{flex:1;min-height:480px;resize:none;border:0;outline:0;background:#fff8c9aa;border-radius:20px;padding:15px;line-height:1.7;color:#62585f;box-shadow:inset 0 1px 4px #bcae7130}
+.export{margin-top:10px;border:0;border-radius:16px;padding:11px;background:var(--blue);cursor:pointer;font-weight:700;transition:.2s}
+.export:hover{transform:translateY(-2px)}
+.motivation{padding:18px;height:max-content;position:sticky;top:15px}
+.sticker{font-size:44px;text-align:center;margin:6px 0 12px}
+.achievement{background:var(--green);padding:12px;border-radius:17px;line-height:1.5;font-size:13px}
+.progress{margin-top:12px;background:#f6efff;border-radius:17px;padding:12px;font-size:13px}
+.bar{height:8px;background:#fff;border-radius:99px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;width:0;background:#bca9e9;border-radius:99px;transition:width .4s}
+.center{display:flex;justify-content:center;align-items:center;min-width:0}
+.card{width:100%;max-width:850px;min-height:650px;padding:28px;position:relative;overflow:hidden}
+.card:before{content:"";position:absolute;width:150px;height:150px;border-radius:50%;background:#ffe7f0;right:-65px;top:-65px}
+.card:after{content:"";position:absolute;width:110px;height:110px;border-radius:50%;background:#e6f4ff;left:-50px;bottom:-45px}
+.imageBox{height:150px;border-radius:24px;background:#f7f3ff;display:grid;place-items:center;overflow:hidden;margin-bottom:18px}
+.imageBox img{width:100%;height:100%;object-fit:cover}
+.wordline{display:flex;align-items:center;justify-content:center;gap:12px;position:relative;z-index:1}
+.word{font-size:42px;font-weight:900;letter-spacing:.2px;color:#5d5265;text-align:center;word-break:break-word}
+.speaker{width:46px;height:46px;border:0;border-radius:50%;background:var(--pink);cursor:pointer;font-size:22px;transition:.2s}
+.speaker:hover{transform:scale(1.08) rotate(-4deg)}
+.phonetic{text-align:center;color:#9a8e9b;margin:6px 0 16px}
+.example{background:#f9f7ff;border-radius:22px;padding:15px 18px;display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.example p{margin:0;line-height:1.6;flex:1}
+.example strong{color:#8067a5}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.option{border:2px solid transparent;background:#fff5f8;padding:14px;border-radius:18px;cursor:pointer;text-align:left;transition:.2s;min-height:58px}
+.option:hover{transform:translateY(-2px);box-shadow:var(--shadow2)}
+.option.correct{border-color:#75c995;background:#edfff3}
+.option.wrong{border-color:#ee8c9f;background:#fff0f2}
+.option.disabled{cursor:default}
+.actions{display:flex;gap:10px;margin-top:15px}
+.action{flex:1;border:0;border-radius:17px;padding:11px;cursor:pointer;font-weight:800;transition:.2s}
+.action:hover{transform:translateY(-2px)}
+.fuzzy{background:var(--yellow)} .unknown{background:var(--pink)}
+.explain{margin-top:15px;padding:16px;border-radius:20px;background:#eef7ff;display:none;line-height:1.65;position:relative;z-index:2}
+.explain.show{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.root{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.chip{padding:5px 9px;border-radius:12px;background:#fff;border:1px solid #eee;color:#75677d;font-size:12px}
+.next{margin-top:15px;width:100%;border:0;border-radius:18px;padding:13px;background:var(--purple);cursor:pointer;font-weight:900;display:none}
+.empty{height:100%;min-height:600px;display:grid;place-items:center;text-align:center;padding:40px}
+.empty .big{font-size:65px}
+.modal{position:fixed;inset:0;background:#54465a55;display:none;place-items:center;z-index:20}
+.modal.show{display:grid}
+.pop{background:#fff;border-radius:30px;padding:30px;text-align:center;box-shadow:0 25px 80px #44384b35;animation:pop .3s ease;max-width:360px}
+@keyframes pop{from{transform:scale(.7) rotate(-4deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.pop .emoji{font-size:55px} .pop h3{margin:8px 0;font-size:25px}
+@media(max-width:1050px){.layout{grid-template-columns:180px minmax(0,1fr)}.motivation{display:none}}
+@media(max-width:760px){.app{width:94vw}.layout{grid-template-columns:1fr}.notes{min-height:260px}.notes textarea{min-height:170px}.card{min-height:auto;padding:18px}.options{grid-template-columns:1fr}.word{font-size:34px}.imageBox{height:120px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="logo">📚</div><div><h1>Español · 单词记忆小屋</h1><small>每天一点点，把单词变成自己的。</small></div></div>
+    <nav class="tabs">
+      <button class="tab active" data-pool="new">🌱 学新词</button>
+      <button class="tab" data-pool="fuzzy">🌼 复习模糊词</button>
+      <button class="tab" data-pool="error">🧸 复习错误</button>
+    </nav>
+    <div class="score">⭐ 总积分 <b id="score">0</b></div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel notes">
+      <h2>📝 我的笔记</h2>
+      <textarea id="notes" placeholder="在这里写例句、联想、易错点……"></textarea>
+      <button class="export" id="export">⇩ 导出 TXT</button>
+    </aside>
+
+    <section class="center" id="main"></section>
+
+    <aside class="panel motivation">
+      <h2>🎀 学习激励</h2>
+      <div class="sticker" id="sticker">🌸</div>
+      <div class="achievement" id="achievement">开始学习吧！每答对一个词，都离熟练更近一步。</div>
+      <div class="progress">
+        <div>今日进度：<b id="today">0</b></div>
+        <div class="bar"><i id="bar"></i></div>
+        <div style="margin-top:8px;color:#8d8490">到期复习：<b id="due">0</b></div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<div class="modal" id="modal"><div class="pop"><div class="emoji" id="modalEmoji">🎉</div><h3 id="modalTitle">太棒啦！</h3><p id="modalText">继续保持！</p></div></div>
+
+<script>
+const VOCAB = [["a la derecha","在右边，向右边"],["a pesar de","尽管"],["a punto","就绪"],["a su disposición","支配，吩咐"],["a ver si","且看是不是"],["abrigarse","御寒，保暖"],["abrigo","大衣"],["abrir","打开"],["abuelo, la","祖父母，外祖父母"],["acabar de + inf.","刚刚"],["acaso","难道"],["aceite","油"],["acercar(se)","使接近；靠近"],["acompañar","陪伴"],["acostarse","上床睡觉"],["acreditado, da","派驻"],["activo, va","积极，活跃"],["actualidad","当前(情况)"],["además","此外"],["adiós","再见"],["administrar","管理"],["adónde","（到，去）哪里"],["adquirir","获得，购得"],["adulto, ta","成年人"],["advertencia","警告，提醒"],["aeropuerto","飞机场"],["africano, na","非洲的；非洲人"],["agradable","令人愉快的"],["agradecer","感谢"],["agua mineral","矿泉水"],["ah","啊"],["ahí","那里，那边"],["ahora mismo","现在，马上"],["ahora","现在"],["al + inf.","当……时候；一……就"],["al lado de","在……旁边"],["al mediodía","中午"],["al mismo tiempo","同时"],["alcanzar","赶上"],["alegrar(se)","使高兴，高兴"],["alegre","高兴"],["alegría","欢乐，欣喜"],["alemán","德语"],["Alemania","德国"],["algo","一点，一些"],["alguien","有人"],["algún, na","某一个"],["alguno, na","某位；某个"],["alimento","食品"],["aliñar","用佐料调制"],["allá","那边"],["allí","那里"],["almorzar","吃午饭"],["almuerzo","午餐"],["altiplano","高原"],["alumno, na","学生"],["amable","和蔼；客气"],["amarillo, lla","黄色的"],["amenazar","威胁"],["América Latina","拉丁美洲"],["amigo, ga","朋友"],["ancho, cha","宽的"],["anciano, na","老人"],["animal","动物"],["animarse","使振作，使热闹；振作，提精神"],["antes de","在……之前"],["anunciar","公布,宣布"],["añadir","补充"],["año","年"],["apagar","熄灭，关闭"],["apearse","下（车等）"],["apenas","几乎没有，几乎不"],["aplicado, da","用功的，刻苦的"],["aprender","学，学会"],["apretado, da","挤压的；紧凑的"],["apuntar","做笔记"],["aquí","这里"],["argentino, na","阿根廷人"],["arreglado, da","整理好的"],["arreglar","收拾，整理；修理"],["arrojar","抛，扔"],["arroz","水稻，大米，米饭"],["ascensor","电梯"],["así que","因此"],["así","这样"],["asignar","指派"],["asignatura","课程"],["asilo","（课文中）养老院"],["asomarse","探出身"],["aspecto","样子，面貌；方面"],["asunto","事情"],["asustar(se)","使害怕；害怕"],["atravesar","穿过"],["aunque","虽然"],["autobús","公共汽车"],["avanzado, da","先进的；高(龄)的"],["avanzar","前进"],["avión","飞机"],["ayudar","帮助"],["azteca","阿兹特克的；阿兹特克人"],["azul","蓝色的"],["bachillerato","高中"],["bajar","向下走"],["bajo, ja","低的，矮的"],["bañarse","泡澡"],["baño","卫生间"],["barato, ta","便宜"],["barra","长条形"],["barrer","扫"],["barro","泥浆"],["bastante","相当地"],["beber","喝"],["besar","亲吻"],["beso","吻"],["biblioteca","图书馆"],["bibliotecario, ria","图书管理员"],["bien","好"],["bienvenido, da","欢迎"],["bisabuelo, la","曾祖父母"],["blanco, ca","白色的"],["Bolivia","玻利维亚"],["boliviano, na","玻利维亚的 玻利维亚人"],["bolso","包，袋"],["bonito, ta","好看的"],["botella","瓶"],["brazo","手臂"],["brindar","祝酒，敬酒"],["bueno,na","好"],["buenos días","早上好"],["buscar","寻找"],["cacharro","锅碗瓢盆"],["cada cual","每个人"],["cada","每一个"],["café","咖啡色的"],["cafetería","咖啡馆"],["caja","收款台；盒子"],["calcetines","袜子"],["calle","街道"],["calzoncillo","内裤"],["cama","床"],["camarero, ra","餐厅服务员"],["cambiarse","换（衣服）"],["camino","路"],["camisa","（男式）衬衣"],["camiseta","汗衫"],["campo","农村，乡下"],["campus","大学校园"],["cansado, da","累，疲劳"],["cansancio","累，疲劳"],["cansar(se)","（使）疲劳，累"],["caracterizarse","特点是"],["cargo","职位，职务"],["cariño","喜爱"],["carne","肉"],["caro, ra","贵"],["carrera","学业，专业，职业"],["carrito","小车"],["carta","信件"],["casa","家，房子"],["casado, da","已婚"],["casar(se)","结婚"],["casi","几乎"],["casualidad","偶然性"],["catar","品尝"],["causar","造成"],["celebrar","举办，庆祝"],["celular(Amer.)","手机(拉美)"],["cenar","吃晚饭"],["centro","中心"],["cepillarse","刷洗"],["cerca","近"],["cerrar","关闭"],["chaqueta","夹克"],["charlar","交谈"],["chico, ca","小伙子；小姑娘"],["chileno, na","智利人"],["chino","汉语，中文"],["chino, na","中国人"],["chocante","令人奇怪的，让人不舒服的"],["chupar(se)","吸吮"],["cierto, ta","某个，一个"],["cinco","五"],["ciudad","城市"],["claro que","当然"],["claro adv.;adj.","清楚；明亮"],["clase","（一节）课"],["cliente","顾客"],["cocina","厨房"],["cocinar","做饭，烹饪"],["coger","拿起"],["colegio","小学"],["Colombia","哥伦比亚"],["color","颜色"],["comedor","饭厅，食堂"],["comentario","评论"],["comenzar","开始"],["comienzo","开始，开头"],["como","正如，正像；由于"],["cómo no","当然可以"],["cómo","怎么"],["compañero,ra","同学"],["comportamiento","行为举止"],["comprador, ra","购物者"],["comprar","购买"],["comprender","理解；懂得"],["computadora(Amer.)","电脑（拉美）"],["común","普通的"],["con frecuencia","经常"],["con","和，用"],["confianza","信任"],["confundir","混淆，弄混"],["confusión","混乱"],["conocer","认识，了解"],["consejo","劝告，忠告"],["considerar","认为"],["constantemente","经常，总是"],["contacto","接触，联系"],["contar","讲述"],["contento, ta","高兴的"],["conversación","会话，谈话"],["conversar","交谈"],["copa","酒杯"],["correr","跑"],["cortina","帘子"],["corto, ta","短"],["cosa","事情"],["costumbre","习惯，习俗"],["creer","相信，认为"],["cuál","哪一个"],["cualquier","任何一个"],["cualquiera","任何一个"],["cuando","当……时"],["cuánto, ta adj.;pron.","多少"],["cuántos, tas","这么，如此"],["cuarto de baño","卫生间"],["cuarto","一刻钟，十五分钟"],["cuatro","四"],["Cuba","古巴"],["cubano, na","古巴人"],["cuento","故事"],["cuidado","小心"],["cuidar","照顾"],["cultura","文化"],["cultural","文化的"],["cumpleaños m.(el,los).","生日"],["cumplir","满（……岁）；履行"],["curso","学年；教程"],["dar","给"],["de buenas a primeras","突兀，冒失"],["de modo que","因此"],["de nada","不客气，不用谢"],["de ninguna manera","无论如何不要……"],["de segundo","第二道（菜）"],["de todos modos","不管怎样"],["de vez en cuando","偶尔，不时"],["de","（表示所属、来源等关系）"],["debajo de","在下面"],["deber","应当；应该，想必"],["débil","虚弱的"],["decano, na","系主任"],["decir","说"],["dedo","指头"],["defecto","缺点"],["dejar","放下；离开；让处于……状态"],["delegación","代表团"],["demás","其他（人，物）"],["demasiado","太，过于"],["demorarse","拖延，耽搁"],["dentro de","在里面"],["dentro","在里面"],["deporte","运动"],["desagradable","令人不快的"],["desarreglado, da","乱七八糟的"],["desayunar","吃早饭"],["descansar","休息"],["desconocido, da","陌生的"],["descuidad","放心"],["desde","从"],["desear","要，愿望"],["desorden","无秩序"],["despacho","办公室"],["despedida","告别"],["despedirse(de)","告别，辞别，送别"],["después de","在……之后"],["detenerse","停住"],["desventaja","劣势，坏处"],["detrás","在……后面"],["deuda","债务"],["deudor, ra","欠债人"],["devolver","归还"],["día","天"],["dictar","讲授"],["diecinueve","十九"],["dieciocho","十八"],["diente","牙"],["diferente","不同的"],["difícil","困难的"],["diplomacia","外交"],["dirección","地址;方向"],["directo, ta","直接的"],["discurso","演讲，发言"],["disponer de","拥有，支配"],["disponerse","准备，打算"],["distinto, ta","不同的"],["diverso, sa","多种多样的"],["divertirse","消遣，游乐"],["docente","教学的"],["doctorado","博士学位"],["doméstico, ca","家里的"],["dominar","掌握"],["dónde","（在）哪里"],["dormitorio","卧室"],["dos","二，两个"],["dotado, da (de)","配备"],["dotar","赋予"],["duda","疑问"],["dueño, ña","主人"],["Ecuador","厄瓜多尔"],["edad","年龄"],["edificio","楼房"],["educado, da","有教养的"],["eh","哦"],["el","（单数阳性定冠词）"],["él","他"],["elegir","挑选；选举"],["ella","她，它"],["ellos","他们"],["ellos, llas","他们，她们，它们"],["elogiar","夸奖"],["embajada","大使馆"],["empezar","开始"],["en absoluto","绝不"],["en efecto","确实，的确"],["en especial","特别，尤其"],["en orden","整齐，有秩序"],["en punto","整点"],["en realidad","实际上"],["en todo caso","不管怎样"],["en vez de","不……而……"],["en","在……里(上)"],["encantado, da","很高兴……"],["encantar","使……着迷"],["encanto","（昵称）宝贝"],["encargar","订购；委托"],["encargarse","担任，承担"],["encargo","委托"],["encender","点燃；打开"],["encima de","在……上面"],["encontrar","找到，遇到"],["encontrarse","处于，位于"],["enfermero, ra","护士"],["enfermo, ma","病人"],["enfurecer(se)","使愤怒；愤怒"],["enriquecedor, ra","可增益的"],["ensalada","沙拉"],["enseguida","马上，立即"],["enseñanza","教育；教授"],["enseñar","教，授课"],["ensuciarse","弄脏"],["entender","理解，懂"],["entonces","那么"],["entrar","进入"],["entregar","交出，交给"],["entrevista","会见，见面"],["enviar","羡慕，嫉妒"],["época","时代，时期"],["equipaje","行李"],["eres","你是"],["es","您（他，她，它）是"],["escoba","扫帚"],["escribir","写"],["escritor, ra","作家"],["escuchar","听，倾听"],["escuela","学校"],["ese, sa","那个"],["eso","那"],["esos, as","那些"],["espacio","空间，地方"],["España","西班牙"],["español, la","西班牙人"],["especial","特别的"],["especialista","专家"],["esperar","等待；希望"],["estación","（地铁，火车）站"],["estafar","欺诈"],["estantería","架子，书架"],["estar","在，处于……状况"],["este, ta","这个"],["estilo","风格"],["estorbar","碍事，妨碍"],["estos, tas","这些"],["estrecho, cha","窄"],["estropear","弄坏"],["estudiado, da","学过的"],["estudiante","学生"],["estudiantil","学生的"],["estudiar","学习"],["estudio","书房"],["evitar","避免"],["existencia","存在，生存"],["experiencia","经验"],["explicar","解释"],["exterior","外部的"],["facultad","（院）系"],["familia","家庭"],["familiar","家人"],["farmacéutico, ca","药剂师"],["farmacia","药房"],["fascinante","令人着迷的"],["felicitación","祝贺"],["felicitar","祝贺"],["feliz","幸福"],["feo, a","难看，丑"],["fiera","猛兽"],["fiesta","聚会，节日"],["fin","结尾"],["forma","形式"],["formar","组成"],["foto","照片"],["francés, sa","法语"],["Francia","法国"],["franqueza","坦率"],["frase","句子"],["fregar","擦"],["fregona","墩布"],["frío, a","冷"],["fruta","水果"],["fuego","火"],["fuera","在外面"],["fuerte","有力，结实"],["funcionario, ria","官员"],["furgoneta","旅行车"],["ganar","赢得"],["ganas","愿望"],["gato, ta","猫"],["gen","基因"],["generación","一代人"],["gerente","经理"],["gorro","帽子"],["gracias","谢谢"],["graduarse","毕业"],["gramática","语法"],["grande","大"],["grato, ta","令人愉快的"],["gris","灰色的"],["gritar","喊，叫"],["grueso, sa","粗，厚"],["grupo","团队，组"],["guapo, pa","漂亮的，帅的"],["guía","导游"],["gustar","使……喜欢"],["haber","有"],["habitación","房间"],["hábito","习惯"],["habla","说，讲"],["hablar","谈论"],["hacer compras","购物，买东西"],["hacer falta","必须"],["hacer","做，干"],["hacia","朝……（方向）"],["hambre","饥饿"],["hermano, na","兄弟；姊妹"],["hiena","鬣狗"],["hijo, ja","儿子；女儿"],["Hispanoamérica","西班牙语美洲"],["hispanoablante","以西班牙语为母语的人"],["historia","历史"],["hola","你好"],["hombre","男人"],["hora","小时"],["horario","作息时间"],["hospital","医院"],["hotel","饭店，宾馆"],["hoy en día","如今"],["hoy","今天"],["idea","主意"],["imaginarse","想象"],["impermeable","防水的；雨衣"],["importancia","重要性"],["importante","重要的"],["importar","在意，要紧"],["imposible","不可能的"],["impresión","印象"],["inca","印加的；印加人"],["incluir","包括"],["inconveniente","不便"],["indicar","指出"],["información","信息"],["informar","提供信息"],["inglés","英语"],["iniciar","起头，开始"],["inicio","开端；开始"],["inmediatamente","马上"],["instalarse","安顿"],["instituto","中学"],["inteligente","聪明"],["interés","兴趣"],["interesante","令人感兴趣的"],["interesar","让……感兴趣"],["Internet","因特网"],["invierno","冬天"],["invitación","邀请"],["invitado, da","客人"],["invitar","邀请"],["ir","去"],["irse","离开，走开"],["izquierda","左面"],["jardín","花园"],["jersey(Esp.)","毛衣（西班牙）"],["jornada","工作日"],["joven","青年人"],["jugar","游戏，玩耍"],["juguete","玩具"],["junto a","在近旁"],["junto, ta","一起的"],["justo","恰好"],["kilo","公斤"],["La Paz","拉巴斯"],["largo, ga","长"],["las art. (","复数阴性定冠词)"],["latinoamericano, na","拉丁美洲的；拉丁美洲人"],["lavar","清洗"],["le","您、他（她，它）（第三人称单数与格代词）"],["lección","功课"],["leche","奶"],["lectura","阅读"],["leer","读，看"],["lejos","远"],["lengua","语言"],["lentamente","缓慢地"],["león, na","狮子"],["levantarse","起床"],["libre","空闲的"],["librería","书店"],["libro","书"],["limitarse","限于，只"],["limpieza","扫除"],["limpio, pia","干净"],["línea","线路"],["lista","单子"],["literario, ria","文学的"],["llamada","打电话"],["llamarse","叫……名字"],["llegar","到达"],["lleno, na","装满的"],["llevar +","表示时间的名词+地点 呆在……地方……时间"],["llevar","送去，带去"],["lluvia","雨"],["lo mismo","同样的事情"],["lo, la","您(他,她，它)（第三人称单数宾格代词）"],["longevidad","长寿"],["longevo, va","长寿；长寿者"],["los","（复数阳性定冠词）"],["los, las","你们（礼貌式），诸位，他们，她们，它们（第三人称复数宾格代词）"],["luego","之后"],["lugar","地方"],["madre","母亲"],["mal","坏，糟糕"],["maletín","手提包"],["malo, la","坏的，不好的"],["mamá","妈妈"],["mandar","命令,派遣;寄送"],["mantequilla","黄油"],["mañana","明天"],["marrón","棕色的"],["más bien loc.adv. (","课文中)这样吧"],["más","更多地"],["matrimonio","夫妻；婚姻"],["maya","玛雅的；玛雅人"],["mayor parte","大部分"],["mayor","年纪大的"],["me llamo","我叫"],["me","我（单数第一人称宾格和与格代词）"],["medias","（女式）长袜"],["médico, ca","医生"],["medio","环境"],["mediodía","中午"],["mejorar","改进"],["menor","年纪较小的"],["mermelada","果酱"],["mes","月"],["mesa","桌子"],["meter","装进，塞进"],["metro","地铁"],["mexicano, na","墨西哥人"],["mi","我的"],["mientras","与……同时"],["mil","千"],["ministerio","部（委）"],["minuto","分（钟）"],["mío, a","我的"],["mirar","看"],["misión","任务"],["mochila","双肩背包"],["modernidad","现代化"],["moderno, na","现代的"],["mojado, da","湿的"],["molestar","打扰，麻烦"],["momento","时候"],["moreno, na","黝黑的"],["mostrador","柜台"],["mostrar","展示；表明"],["motivo","原因"],["móvil(Esp.)","手机（西班牙）"],["mucho gusto","很高兴（认识你，您，你们，诸位）"],["mucho, cha","很多的"],["mujer","女人"],["muy","很"],["nacional","国家的"],["nada más","再没有了"],["nadie","没人"],["naranja","橙色的"],["natural","自然的，天然的"],["necesario, ria","必需的"],["necesitar","需要"],["negocio","生意，买卖"],["negro, gra","黑色的"],["nervioso, sa","紧张"],["ni mucho menos","更不要……"],["ni conj. y","的否定形式"],["nieto, ta","孙子，孙女；外孙，外孙女"],["niño, ña","儿童"],["no","不，不是"],["no… hasta","直到……才"],["nombre","名字"],["normal","正常的"],["nos","我们（第一人称复数宾格、与格代词）"],["novato, ta","新来的；新手"],["novela","小说"],["novio, via","情侣，朋友"],["nuestro, tra","我们的"],["nueve","九"],["nuevo, va","新"],["número","号码"],["numeroso, sa","众多的"],["o sea","或者说"],["o","或者，还是"],["¡Oh!","噢！"],["obra","著作，作品"],["observar","观察"],["ocho","八"],["ocupado, da","忙碌的"],["oficina","办公室"],["ofrecer","提供"],["oír","听见"],["ojalá","但愿"],["olor","气味"],["olvidar(se)","忘记"],["once","十一"],["oportunidad","机会"],["ordenador(Esp.)","电脑"],["organizar","组织"],["oscuro, ra","黑暗"],["otro, tra","其他的"],["paciencia","耐心"],["padre","父亲"],["pagar","付款"],["país","国家"],["paisaje","风景"],["pan","面包"],["panameño, ña","巴拿马人"],["pantalones","裤子"],["papel","纸"],["paquete","包裹"],["par","双，对"],["para","为了"],["parada","公共汽车站"],["parecer","好像"],["pareja","夫妻；一对儿"],["pariente","亲戚"],["parque","公园"],["pasar","过（时间/空间）"],["pasillo","走廊"],["pedir","要，要求"],["peinarse","梳头"],["peligroso, sa","危险的"],["pena","遗憾;痛苦"],["pendiente","悬着的"],["penoso, sa","痛苦的，难过的"],["pensar","想"],["pequeño, ña","小的"],["perder","丢失"],["perderse","迷路"],["perdón","对不起，抱歉"],["perfecto, ta","完美的"],["periódico","报纸"],["pero","但是"],["persona","人"],["personal","人员"],["pertenecer","属于"],["Perú","秘鲁"],["pescado","鱼"],["pino","松树"],["piso","层"],["placer","荣幸，高兴"],["plantear","提出"],["plato","菜，盘子"],["pocilga","猪圈"],["poco a poco","一点点，逐渐"],["poder","能够"],["poner","放"],["ponerse","开始处于某种状态"],["ponerse a +inf.","开始"],["por casualidad","偶然，凑巧"],["por ejemplo","例如"],["por el momento","暂时，眼下"],["por eso","因此"],["por favor","请，劳驾"],["por la mañana","上午"],["por la noche","晚上"],["por la tarde","下午"],["por lo menos","至少"],["por ningún motivo","任何情况下不得"],["por qué","为什么"],["por supuesto","当然"],["por último","最后"],["por","（课文）在……；为了……"],["porque","因为，原因是"],["postal (tarjeta ~ )","明信片"],["postre","甜点"],["práctica","练习,实习,实践"],["practicante","实践者"],["precipitarse","急于做……"],["precisamente","恰恰"],["precolombino, na","哥伦布到达美洲之前"],["preguntar","提问"],["preocuparse","使着急，使担心；着急，担心"],["prepararse","准备"],["presentar","介绍"],["prestar atención a","注意，重视"],["prestar","给予，借出"],["primero","首先"],["primero, ma","第一批"],["primo, ma","（堂、表）兄弟姐妹"],["prisa","急，匆忙"],["probador","试衣间"],["probarse","试（穿，戴）"],["problema","问题"],["profesión","职业"],["profesional","职业的；专业的"],["profesor, ra","教师"],["programa","纲领；节目，日程"],["prolongado, da","延长了的，长期的"],["prolongarse","延长"],["promesa","诺言"],["prometer","许诺"],["pronto","过早，很快"],["pronunciación","发音"],["pronunciar","发音"],["propósito","意愿；目的"],["proteger","保护，保卫"],["provechoso, sa","有益的"],["público, ca","公共的，公立的"],["pueblo","人民"],["puerta","门"],["pues","嗯，是这样"],["¡Qué maravilla!","太棒了！"],["¡Qué va!","不是！哪里！"],["qué","什么"],["quedar por","有待于"],["quedar","位于"],["quedarle a uno bien(mal)","（某人）穿戴……合适（不合适）"],["quedarse","呆，留在"],["quehaceres","活儿，工作"],["querer","喜欢；喜爱；爱"],["queso","奶酪"],["quién, es","谁，哪几位"],["rápido","快"],["raras veces","很少几次"],["raro, ra","罕见，奇怪"],["rato","一会儿"],["razón","道理"],["real","真正的"],["recargado, da","繁重"],["recepción","宾馆前台"],["recepcionista","前台服务员"],["receta","菜谱；药方"],["recibir","迎接，接待"],["recién","刚刚，新近"],["recoger","收起，拾起"],["recomendar","推荐"],["recordar","记住；提醒"],["regalo","礼物"],["regar","浇灌"],["regresar","回，返回"],["relación","关系"],["relacionado, da","和……有关"],["reliciente","锃亮"],["reparar","修理"],["repasar","复习"],["repetir","重复"],["residencia","公寓"],["residencial","住宅的"],["resistirse","抗拒，抵触"],["respirar","呼吸"],["restaurante","饭馆"],["resultar","结果是……"],["retirar","撤下，拿走"],["retrasarse","延迟，推迟"],["retraso","推迟，延迟"],["reunirse","会合；开会"],["revista","杂志"],["roble","栎树"],["rojo, ja","红色的"],["romper","打破"],["ropa","衣服"],["ruido","声音"],["sábana","床单"],["saber","知道"],["sabor","味道"],["sabroso, sa","好吃的，有滋味的"],["sacar","取出"],["sala de estar","客厅"],["salario","工资"],["salida","出门，出口；出发"],["salir","离开"],["saltar","跳"],["saludar","问候，打招呼"],["salvar","救助；克服"],["sano, na","健康的"],["satisfacción","满意"],["se llama","他（她，您）叫"],["secar(se) tr.;prnl. (","使)干，(自)干"],["sección","部门"],["seco, ca","干的"],["secretario, ria","秘书"],["secundaria","中学"],["sed","渴"],["seguir","继续，接着"],["según","根据"],["seguramente","很可能"],["seguridad","安全；保险"],["seis","六"],["semana","星期，周"],["semestre","学期"],["sencillamente","就，仅仅"],["sentarle a uno bien(mal)","（某物）与（某人）相配（不相配）"],["sentarse","坐下"],["sentir","感到;抱歉"],["sentirse","感觉"],["señor, ra","先生；女士"],["señorita","小姐"],["ser","是"],["serio, ria","严肃的"],["servicio","服务"],["servir","服务；用于……"],["sí","是的，对"],["si","如果"],["siempre","总是"],["siete","七"],["significar","意思是"],["silla","椅子"],["simpático, ca","可爱的,可亲的"],["sin embargo","然而，不过"],["sin falta","一定"],["sin","没有"],["sistema","制度，方法"],["sitio","地方"],["sobre todo","特别，尤其"],["sobre","关于"],["sobrepasar","超过"],["sobrino, na","外甥，侄子；外甥女，侄女"],["sofá","沙发"],["soler","习惯做……"],["solo","只是"],["solución","解决，出路，办法"],["somos","我们是"],["son","他（她）们是；你们（礼貌式）是"],["sonar","响"],["sonreír","微笑"],["sopa de marisco","海鲜汤"],["sorprender","使吃惊"],["sorpresa","惊喜；惊奇的事"],["soy","我是"],["su","您（诸位；他[们]，她[们]）的"],["subir","向上走；送上去"],["suciedad","脏（的状况）"],["sucio, cia","脏的"],["suelo","地面"],["suerte","运气"],["suéter(Amer.)","毛衣（拉美）"],["suficiente","足够的"],["supermercado","超市"],["suponer","设想，猜测"],["surtido, da","丰富的"],["talla","（衣服）尺码"],["también","同样，也"],["tan pronto como","一……就……"],["tan","如此，这么"],["tanto, ta","如此的，那么的"],["tarde","晚"],["taxi","出租车"],["taxista","出租司机"],["te","你（第二人称单数宾格、与格代词）"],["te llamas","你叫"],["teclear","敲击（键盘）"],["tela","布料"],["telefonear","打电话"],["teléfono","电话"],["televisor","电视机"],["tema","题材，主题"],["temer","担心，害怕"],["temperatura","温度"],["temprano","早"],["tender","铺开，展开；晾晒"],["tener que + inf.","必须"],["tener","有"],["terminar","结束"],["tiempo","时间"],["tienda","商店"],["tinto,ta","深红色的"],["tío, a","伯、叔、舅；姑、姨、婶"],["típico, ca","地道的，典型的"],["título","题目"],["toalla","毛巾"],["tocar","触摸；轮到"],["todavía","仍然，还"],["todo el mundo","所有人"],["todo, da","所有的"],["tomar en cuenta","考虑，关注"],["tomar","拿；乘坐"],["total adj.;adv.","完全的，全部的；总之"],["trabajar","工作，劳动"],["trabajo de casa","作业"],["trabajo","作业，文章，小论文"],["traer","带来"],["tranquilo, la","安静的；放心"],["trapo","抹布"],["tratar","对待"],["tres","三"],["triste","悲伤"],["tú","你"],["turista","游客"],["tuyo, ya","你的"],["un poco","一点儿"],["universidad","大学"],["universitario, ria","大学的"],["uno, una","一个"],["urbano, na","城市的，都市的"],["usar","使用"],["usted","您"],["ustedes","你们（礼貌式）"],["utensilio","用具"],["útil","有用的"],["utilizar","使用"],["vario, ria","几个"],["vaso","杯子"],["vecino, na","邻居"],["vendedor, ra","售货员"],["venir","来"],["ventaja","优势，好处"],["ventanilla","小窗口"],["ver","看见"],["verano","夏天"],["verdad","真实"],["verdadero, ra","真正的"],["verde","绿色的"],["verdura","蔬菜"],["vez","次数"],["viaje","旅行"],["vida","生活"],["vino","葡萄酒"],["visitante","访问者"],["visitar","拜访，看望"],["vital","精力充沛"],["vivir","住，生活"],["volumen","体积；音量"],["volver a + inf.","再一次，重新"],["voz","声音"],["vuelo","航班"],["y","和，与"],["ya","已经；好了"],["yo","我"],["yogur","酸奶"],["zapato","鞋"],["zona","地区"]];
+
+const STORAGE = {
+  progress: "es_vocab_progress_v1",
+  score: "es_vocab_score_v1",
+  notes: "es_vocab_notes_v1",
+  daily: "es_vocab_daily_v1"
+};
+const INTERVALS = [0,1,2,4,7,15,30,60];
+
+function load(key, fallback) {
+  try { const x=localStorage.getItem(key); return x===null?fallback:JSON.parse(x); }
+  catch(e) { return fallback; }
+}
+function save(key,val) { localStorage.setItem(key,JSON.stringify(val)); }
+
+let progress=load(STORAGE.progress,{});
+let score=load(STORAGE.score,0);
+let notes=localStorage.getItem(STORAGE.notes)||"";
+let daily=load(STORAGE.daily,{date:"",count:0});
+let pool="new";
+let current=null;
+let answered=false;
+
+const $=s=>document.querySelector(s);
+$("#score").textContent=score;
+$("#notes").value=notes;
+
+function todayKey(){return new Date().toISOString().slice(0,10)}
+if(daily.date!==todayKey()){daily={date:todayKey(),count:0};save(STORAGE.daily,daily)}
+$("#today").textContent=daily.count;
+
+function normalize(w){
+  return w.toLowerCase()
+    .replace(/\([^)]*\)/g,"").replace(/,\s*(la|el|los|las)$/,"")
+    .replace(/á/g,"a").replace(/é/g,"e").replace(/í/g,"i").replace(/ó/g,"o").replace(/ú/g,"u")
+    .replace(/[¿?¡!.,;:]/g,"").trim();
+}
+function rootKey(w){
+  let s=normalize(w).replace(/\s+/g,"");
+  s=s.replace(/(mente|ción|sión|ando|iendo|ado|ido|able|al|ar|er|ir|es|as|os|a|o)$/,"");
+  return s.slice(0,Math.max(4,Math.min(7,s.length)));
+}
+
+const words=VOCAB.map((v,i)=>({
+  id:i, word:v[0], correctMeaning:v[1],
+  wrongMeanings:[], sentence:"", translation:"", imageUrl:"",
+  rootWords:[], knowledge:"", analysis:""
+}));
+
+const rootMap={};
+words.forEach(w=>{
+  const k=rootKey(w.word); (rootMap[k] ||= []).push(w);
+});
+words.forEach(w=>{
+  const group=rootMap[rootKey(w.word)]||[];
+  w.rootWords=group.filter(x=>x.id!==w.id).slice(0,6).map(x=>x.word);
+  w.knowledge=w.rootWords.length
+    ? `词根联想：${w.rootWords.join("、")}。可以把这些词放在同一组里反复记忆。`
+    : `用例句和固定搭配一起记忆“${w.word}”，比只记中文释义更牢固。`;
+  w.analysis=`${w.word} 的核心意思是“${w.correctMeaning}”。答题后尝试用它自己造一个西语句子。`;
+  const isPhrase=w.word.includes(" ");
+  w.sentence=(isPhrase?`Hoy practicamos la expresión «${w.word}» en clase.`:`Hoy practicamos la palabra «${w.word}» en clase.`);
+  w.translation=(isPhrase?`今天我们在课堂上练习“${w.word}”这个表达。`:`今天我们在课堂上练习“${w.word}”这个词。`);
+  w.imageUrl=makeImage(w.word);
+});
+
+function makeImage(word){
+  const safe=word.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").slice(0,24);
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="900" height="360" viewBox="0 0 900 360">
+    <defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#ffe5ef"/><stop offset="1" stop-color="#e5f4ff"/></linearGradient></defs>
+    <rect width="900" height="360" rx="40" fill="url(#g)"/>
+    <circle cx="130" cy="115" r="58" fill="#fff5bd"/><circle cx="770" cy="250" r="72" fill="#e5ddff"/>
+    <path d="M110 145 Q130 185 150 145" fill="none" stroke="#8b7b91" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="110" cy="112" r="7" fill="#8b7b91"/><circle cx="150" cy="112" r="7" fill="#8b7b91"/>
+    <text x="450" y="175" text-anchor="middle" font-family="Arial,sans-serif" font-size="48" font-weight="800" fill="#66586d">${safe}</text>
+    <text x="450" y="225" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" fill="#8d8192">Español · aprender jugando</text>
+  </svg>`;
+  return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(svg);
+}
+
+function defaultState(){return {state:"new",level:0,last:0,due:0,correct:0,wrong:0}}
+function st(id){return progress[id] || (progress[id]=defaultState())}
+function isDue(x){return !x.due || x.due<=Date.now()}
+function dueCount(){return words.filter(w=>isDue(st(w.id)) && st(w.id).state==="familiar").length}
+function poolWords(){
+  if(pool==="fuzzy") return words.filter(w=>st(w.id).state==="fuzzy" && isDue(st(w.id)));
+  if(pool==="error") return words.filter(w=>st(w.id).state==="error" && isDue(st(w.id)));
+  const fresh=words.filter(w=>st(w.id).state==="new");
+  if(fresh.length) return fresh;
+  return words.filter(w=>st(w.id).state==="familiar" && isDue(st(w.id)));
+}
+function shuffled(arr){return [...arr].sort(()=>Math.random()-.5)}
+function optionsFor(w){
+  const others=shuffled(words.filter(x=>x.id!==w.id && x.correctMeaning!==w.correctMeaning))
+    .slice(0,3).map(x=>x.correctMeaning);
+  return shuffled([w.correctMeaning,...others]);
+}
+
+function render(){
+  updateStats();
+  const list=poolWords();
+  if(!list.length){
+    $("#main").innerHTML=`<div class="card empty"><div><div class="big">🌈</div>
+      <h2>${pool==="new"?"今天的新词学完啦！":pool==="fuzzy"?"模糊词暂时没有到期复习。":"错误词暂时没有到期复习。"}</h2>
+      <p>可以切换到其他词库继续学习。</p></div></div>`;
+    current=null; return;
+  }
+  current=list[Math.floor(Math.random()*list.length)];
+  answered=false;
+  const w=current;
+  const opts=optionsFor(w);
+  const target=htmlEscape(w.word);
+  const sentence=htmlEscape(w.sentence).replace(target,`<strong>${target}</strong>`);
+  const root=w.rootWords.length ? `<div class="root">${w.rootWords.map(x=>`<span class="chip">${htmlEscape(x)}</span>`).join("")}</div>` : `<div class="root"><span class="chip">暂无同词根词</span></div>`;
+  $("#main").innerHTML=`<div class="card">
+    <div class="imageBox"><img src="${w.imageUrl}" alt="单词配图"></div>
+    <div class="wordline"><div class="word">${target}</div><button class="speaker" id="speakWord" title="播放西语发音">🔊</button></div>
+    <div class="phonetic">${pool==="new"?"新词 / 到期熟悉词":pool==="fuzzy"?"模糊复习":"错误复习"} · 记忆等级 ${st(w.id).level}</div>
+    <div class="example"><p>${sentence}<br><span style="color:#8f8791">${htmlEscape(w.translation)}</span></p><button class="speaker" id="speakSentence" title="播放例句">🔊</button></div>
+    <div class="options" id="options">${opts.map((o,i)=>`<button class="option" data-meaning="${encodeURIComponent(o)}">${htmlEscape(o)}</button>`).join("")}</div>
+    <div class="actions"><button class="action fuzzy" id="fuzzy">🌼 模糊</button><button class="action unknown" id="unknown">🧸 不认识</button></div>
+    <div class="explain" id="explain"><b>📖 解析：</b>${htmlEscape(w.analysis)}<br><b>🌱 词根/拓展：</b>${htmlEscape(w.knowledge)}${root}</div>
+    <button class="next" id="next">继续下一个 →</button>
+  </div>`;
+  $("#speakWord").onclick=()=>speak(w.word);
+  $("#speakSentence").onclick=()=>speak(w.sentence);
+  document.querySelectorAll(".option").forEach(btn=>btn.onclick=()=>answer(decodeURIComponent(btn.dataset.meaning),btn));
+  $("#fuzzy").onclick=()=>moveTo("fuzzy");
+  $("#unknown").onclick=()=>moveTo("error");
+  $("#next").onclick=render;
+  setTimeout(()=>speak(w.word),250);
+}
+
+function answer(value,btn){
+  if(answered)return;
+  answered=true;
+  const w=current, p=st(w.id), correct=value===w.correctMeaning;
+  document.querySelectorAll(".option").forEach(b=>{
+    b.classList.add("disabled");
+    if(decodeURIComponent(b.dataset.meaning)===w.correctMeaning)b.classList.add("correct");
+  });
+  if(correct){
+    btn.classList.add("correct"); p.correct++; p.level=Math.min(p.level+1,INTERVALS.length-1);
+    p.state="familiar"; p.last=Date.now(); p.due=Date.now()+INTERVALS[p.level]*86400000;
+    const gain=pool==="new"?10:pool==="fuzzy"?5:3;
+    addScore(gain); daily.count++; save(STORAGE.daily,daily); showPraise(gain);
+  } else {
+    btn.classList.add("wrong"); p.wrong++; p.last=Date.now();
+    p.due=Date.now()+6*60*60*1000;
+  }
+  save(STORAGE.progress,progress);
+  $("#explain").classList.add("show"); $("#next").style.display="block";
+  updateStats();
+}
+
+function moveTo(state){
+  if(!current)return;
+  const p=st(current.id); p.state=state; p.last=Date.now(); p.due=Date.now();
+  save(STORAGE.progress,progress); render();
+}
+
+function addScore(n){
+  score+=n; save(STORAGE.score,score);
+  $("#score").textContent=score;
+  $("#score").parentElement.classList.remove("bump"); void $("#score").offsetWidth;
+  $("#score").parentElement.classList.add("bump");
+  const thresholds=[50,100,200,500,1000];
+  const hit=thresholds.find(t=>score>=t && score-n<t);
+  if(hit) showPraise(0,hit);
+}
+
+function showPraise(gain=0,threshold=0){
+  const texts=[
+    ["🎉","太棒啦！","答对了，继续保持！"],
+    ["✨","厉害！","这一词已经成功收入熟悉库。"],
+    ["🌸","稳稳拿下！","再来一个，记忆会越来越牢。"],
+    ["🧁","做得很好！","坚持一点点，词汇量就会一点点长大。"]
+  ];
+  const t=texts[Math.floor(Math.random()*texts.length)];
+  $("#modalEmoji").textContent=t[0]; $("#modalTitle").textContent=threshold?`${threshold} 分达成！`:t[1];
+  $("#modalText").textContent=gain?`${t[2]} +${gain} 分`:t[2];
+  $("#modal").classList.add("show"); setTimeout(()=>$("#modal").classList.remove("show"),1200);
+}
+
+function speak(text){
+  if(!("speechSynthesis" in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang="es-ES"; u.rate=.88; u.pitch=1.02; u.volume=.85;
+  speechSynthesis.speak(u);
+}
+
+function successSound(){
+  try{
+    const C=window.AudioContext||window.webkitAudioContext; if(!C)return;
+    const ctx=new C(), now=ctx.currentTime;
+    [523.25,659.25,783.99].forEach((f,i)=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(.0001,now+i*.08);
+      g.gain.exponentialRampToValueAtTime(.12,now+i*.08+.02);
+      g.gain.exponentialRampToValueAtTime(.0001,now+i*.08+.22);
+      o.connect(g);g.connect(ctx.destination);o.start(now+i*.08);o.stop(now+i*.08+.24);
+    });
+  }catch(e){}
+}
+
+function htmlEscape(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function updateStats(){
+  $("#score").textContent=score; $("#today").textContent=daily.count;
+  const due=dueCount(); $("#due").textContent=due;
+  const total=words.length, familiar=words.filter(w=>st(w.id).state==="familiar").length;
+  $("#bar").style.width=Math.min(100,familiar/total*100)+"%";
+  $("#achievement").textContent=score>=200?"🏆 词汇小达人：200+ 分！":score>=100?"🌟 已经超过 100 分啦！":score>=50?"🎈 50 分成就解锁！":"每答对一个词，都会积累一点成就感。";
+}
+
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active")); b.classList.add("active");
+  pool=b.dataset.pool; render();
+});
+
+$("#notes").addEventListener("input",e=>localStorage.setItem(STORAGE.notes,e.target.value));
+$("#export").onclick=()=>{
+  const blob=new Blob([$("#notes").value],{type:"text/plain;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="我的西语学习笔记.txt";a.click();URL.revokeObjectURL(a.href);
+};
+$("#modal").onclick=e=>{if(e.target.id==="modal")$("#modal").classList.remove("show")};
+
+const originalAnswer=answer;
+answer=function(value,btn){const before=answered; originalAnswer(value,btn); if(!before && value===current.correctMeaning) successSound();};
+render();
+</script>
+</body>
+</html>
